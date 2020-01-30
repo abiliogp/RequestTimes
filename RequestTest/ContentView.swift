@@ -9,8 +9,87 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    @ObservedObject var requestViewModel = RequestViewModel()
+    
+    @State private var requestTimes: Double = 1
+    
+    private var ipDictionary: [String] = []
+    
+    init() {
+        if let path = Bundle.main.path(forResource: "RequestIps", ofType: "plist"){
+            ipDictionary = NSArray(contentsOfFile: path) as! [String]
+        }
+    }
+    
     var body: some View {
-        Text("Hello, World!")
+        NavigationView{
+            VStack{
+                Text("Counter: \(requestViewModel.counterRequest)")
+                
+                ScrollView{
+                    Text(requestViewModel.outputRequest)
+                }.padding(.bottom, 50)
+                
+                HStack{
+                    Text("Request: \(Int(self.requestTimes))")
+                    Slider(value: $requestTimes, in: 1...1000, step: 1).padding(.horizontal, 24)
+                    
+                    Button(action: {
+                        self.requestViewModel.cleanAllValues()
+                        self.requestTimes = 1
+                    }) {
+                        Text("Clean")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .background(Color.gray, alignment: .leading)
+                            .cornerRadius(4)
+                            .padding(4)
+                    }
+                }.padding(.horizontal, 16)
+                
+                
+                VStack{
+                    
+                    ForEach(ipDictionary, id: \.self) { ip in
+                        ButtonRequest(requestViewModel: self.requestViewModel,
+                                      color: Color.orange,
+                                      url: ip,
+                                      label: ip,
+                                      requestTime: Int(self.requestTimes))
+                    }
+                    
+                    
+                }
+            }
+        }.navigationBarTitle("Request test")
+        
+    }
+}
+
+struct ButtonRequest: View {
+    
+    var requestViewModel: RequestViewModel!
+    
+    var color: Color!
+    var url: String!
+    var label: String!
+    var requestTime: Int!
+    
+    var body: some View{
+        Button(action: {
+            self.requestViewModel.cleanAllValues()
+            self.requestViewModel.makeRequest(requestUrl: self.url, times: self.requestTime)
+        }) {
+            Text(label)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .background(color, alignment: .leading)
+                .lineLimit(1)
+                .truncationMode(.head)
+                .cornerRadius(4)
+                .padding(4)
+        }
     }
 }
 
