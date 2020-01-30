@@ -16,6 +16,10 @@ struct ContentView: View {
     
     private var ipDictionary: [String] = []
     
+    //Settigns for the request parameters
+    private var limitRequest: Double = 1000
+    private var stepRequest: Double = 1
+    
     init() {
         if let path = Bundle.main.path(forResource: "RequestIps", ofType: "plist"){
             ipDictionary = NSArray(contentsOfFile: path) as! [String]
@@ -33,7 +37,8 @@ struct ContentView: View {
                 
                 HStack{
                     Text("Request: \(Int(self.requestTimes))")
-                    Slider(value: $requestTimes, in: 1...1000, step: 1).padding(.horizontal, 24)
+                    Slider(value: $requestTimes, in: 1...limitRequest, step: stepRequest)
+                        .padding(.horizontal, 24)
                     
                     Button(action: {
                         self.requestViewModel.cleanAllValues()
